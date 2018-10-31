@@ -23,8 +23,7 @@ sub run_tests {
 
 sub clear_cache {
 	my @files = @_;
-	delete $INC{$_} for @files;
-	require $_ for @files;
+	delete $INC{$_} && require $_ for @files;
 }
 
 run_tests;
