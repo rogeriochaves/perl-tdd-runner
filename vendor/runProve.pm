@@ -16,19 +16,28 @@ $SIG{__WARN__} = sub{
 sub run_tests {
 	my $tb = Test::More->builder;
 	$tb->reset();
-	clear_cache("Test.t");
-	require("Test.t");
+	delete $INC{"t/Test.t"};
+	require("t/Test.t");
 }
 
 
 sub clear_cache {
 	my @files = @_;
-	delete $INC{$_} && require $_ for @files;
+	for my $file (@files) {
+		my $is_test = $file =~ m/\.t$/;
+		next if $is_test;
+
+		my $module_key = (grep { $INC{$_} eq $file } (keys %INC))[0];
+		next unless $module_key;
+
+		delete $INC{$module_key};
+		require $file;
+	}
 }
 
 run_tests;
 
-my $watcher = Filesys::Notify::Simple->new([".", "Test.t"]);
+my $watcher = Filesys::Notify::Simple->new([".", "t/Test.t"]);
 while (1) {
 	$watcher->wait(
 		sub {

@@ -3,7 +3,7 @@ package SlowFile;
 use strict;
 use warnings;
 
-sleep(6);
+sleep(5);
 
 
 sub answer {
