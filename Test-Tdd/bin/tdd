@@ -1,3 +1,0 @@
-#!perl
-
-use Tdd::Runner;
