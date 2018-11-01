@@ -39,6 +39,9 @@ sudo dzil install
 You can run the examples with:
 
 ```bash
+export PATH="$(pwd)/bin:$PATH"
+export PERL5LIB="$(pwd)/lib"
+
 cd example
-perl -Ilib ../lib/Test/Tdd.pm --watch lib t/Test.t
+provetdd --watch lib t/Test.t
 ```
