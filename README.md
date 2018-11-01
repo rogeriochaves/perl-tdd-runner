@@ -21,6 +21,7 @@ sudo cpan install Dist::Zilla
 ```
 
 If it fails you can force it
+
 ```bash
 sudo cpan
 
@@ -39,5 +40,5 @@ You can run the examples with:
 
 ```bash
 cd example
-perl -Ilib ../lib/Test/Tdd.pm t/Test.t
+perl -Ilib ../lib/Test/Tdd.pm --watch lib t/Test.t
 ```
