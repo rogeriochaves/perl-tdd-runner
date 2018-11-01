@@ -14,10 +14,10 @@ provetdd -Ilib t/path/to/Test.t
 
 ## How to install it from source
 
-First install Dist::Zilla
+First install cpanm and Dist::Zilla
 
 ```bash
-sudo cpan install Dist::Zilla
+sudo cpan install App::cpanminus Dist::Zilla
 ```
 
 If it fails you can force it
@@ -31,7 +31,7 @@ sudo cpan
 Then you can install it locally
 
 ```bash
-dzil install
+sudo dzil install
 ```
 
 ## For development
