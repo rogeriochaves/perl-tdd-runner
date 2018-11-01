@@ -21,7 +21,7 @@ sub run_tests {
 	$tb->reset();
 	for my $test_file (@test_files) {
 		delete $INC{$test_file};
-		require($test_file);
+		require $test_file;
 	}
 }
 
