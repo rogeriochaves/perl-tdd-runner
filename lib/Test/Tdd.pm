@@ -28,7 +28,7 @@ show_usage() if $help;
 @watch = split(/,/, join(',', @watch));
 @watch = ('.') unless @watch;
 
-@INC = (@INC, '.', @includes);
+@INC = ('.', @watch, @INC, @includes);
 
 my @test_files = @ARGV;
 show_usage() unless @test_files;

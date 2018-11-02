@@ -19,23 +19,31 @@ sub run_tests {
 
 	my $tb = Test::More->builder;
 	$tb->reset();
-	for my $test_file (@test_files) {
-		delete $INC{$test_file};
-		require $test_file;
+	eval {
+		for my $test_file (@test_files) {
+			delete $INC{$test_file};
+			require $test_file;
+		}
+	} or do {
+		print $@;
 	}
 }
 
-
 sub clear_cache {
 	my @files = @_;
+	my @broken_files = grep { !defined $INC{$_} } (keys %INC);
+	delete $INC{$_} for @broken_files;
+
 	for my $file (@files) {
 		my $is_test = $file =~ m/\.t$/;
 		next if $is_test;
 
-		my $module_key = (grep { $INC{$_} eq $file } (keys %INC))[0];
-		next unless $module_key;
+		unless (scalar @broken_files) {
+			my $module_key = (grep {$INC{$_} eq $file} (keys %INC))[0];
+			next unless $module_key;
 
-		delete $INC{$module_key};
+			delete $INC{$module_key};
+		}
 		require $file;
 	}
 }
@@ -64,8 +72,12 @@ sub start {
 				}
 				print "\n";
 				print "Running tests...\n";
-				clear_cache(@files_changed);
-				run_tests(@test_files);
+				eval {
+					clear_cache(@files_changed);
+					run_tests(@test_files);
+				} or do {
+					print $@;
+				}
 			}
 		);
 	}
