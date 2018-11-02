@@ -40,7 +40,7 @@ You can run the examples with:
 
 ```bash
 export PATH="$(pwd)/bin:$PATH"
-export PERL5LIB="$(pwd)/lib"
+export PERL5LIB="$PERL5LIB:$(pwd)/lib"
 
 cd example
 provetdd --watch lib t/Test.t
