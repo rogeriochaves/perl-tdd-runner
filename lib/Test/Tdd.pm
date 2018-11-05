@@ -5,15 +5,8 @@ package Test::Tdd;
 use strict;
 use warnings;
 use Test::Tdd::Runner;
-use Data::Dumper;
 use Getopt::Long;
 Getopt::Long::Configure('bundling');
-
-=head1 NAME
-Test::Tdd - Run tests continuously, detecting changes
-=head1 SYNOPSIS
-  $ provetdd t/path/to/Test.t
-=cut
 
 my $help;
 my @watch = ();
@@ -50,3 +43,20 @@ EOF
 }
 
 1;
+
+
+=head1 NAME
+
+Test::Tdd - Run tests continuously, detecting changes
+
+=head1 SYNOPSIS
+
+You can run the tests using C<provetdd>
+
+    provetdd t/path/to/Test.t
+
+You can also specify paths to add to INC and specific paths to watch
+
+    provetdd -Ilib --watch lib/path,lib/path2 t/path/to/Test.t
+
+=cut

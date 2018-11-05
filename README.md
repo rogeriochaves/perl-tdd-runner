@@ -1,15 +1,17 @@
 # Perl TDD Runner
 
+This is a tool that runs your Perl tests continuouslly when files change, helping you to TDD. Differently from [provewatch](https://metacpan.org/pod/App::Prove::Watch), the `provetdd` holds all loaded modules in memory, and only reload what it needed, making it exponentially faster to run when testing a huge Perl codebase.
+
 ## How to use
 
 ```bash
 provetdd t/path/to/Test.t
 ```
 
-You can also add any Perl arguments you need
+You can specify paths to add to INC and specific paths to watch
 
 ```bash
-provetdd -Ilib t/path/to/Test.t
+provetdd -Ilib --watch lib/path,lib/path2 t/path/to/Test.t
 ```
 
 ## How to install it from source

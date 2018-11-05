@@ -5,7 +5,6 @@ use warnings;
 use Filesys::Notify::Simple;
 use Test::More;
 use Cwd 'cwd';
-use Data::Dumper;
 
 # Ignore warnings for subroutines redefined, source: https://www.perlmonks.org/bare/?node_id=539512
 $SIG{__WARN__} = sub{
