@@ -30,7 +30,13 @@ sudo cpan
 > force install Dist::Zilla
 ```
 
-Then you can install it locally
+Then install the dzil deps:
+
+```bash
+dzil authordeps --missing | sudo cpanm
+```
+
+Now you can install it locally
 
 ```bash
 sudo dzil install
