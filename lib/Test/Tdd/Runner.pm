@@ -4,6 +4,7 @@ use strict;
 use warnings;
 use Filesys::Notify::Simple;
 use Test::More;
+use Test::Builder::Tester;
 use Cwd 'cwd';
 
 # Ignore warnings for subroutines redefined, source: https://www.perlmonks.org/bare/?node_id=539512
@@ -11,6 +12,7 @@ $SIG{__WARN__} = sub{
 	my $warning = shift;
 	warn $warning unless $warning =~ /Subroutine .* redefined at/;
 };
+Test::Builder::Tester::color(1);
 
 
 sub run_tests {
