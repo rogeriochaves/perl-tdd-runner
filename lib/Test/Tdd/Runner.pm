@@ -4,31 +4,31 @@ use strict;
 use warnings;
 use Filesys::Notify::Simple;
 use Test::More;
-use Test::Builder::Tester;
 use Cwd 'cwd';
+use File::Find qw(finddepth);
 
 # Ignore warnings for subroutines redefined, source: https://www.perlmonks.org/bare/?node_id=539512
 $SIG{__WARN__} = sub{
 	my $warning = shift;
 	warn $warning unless $warning =~ /Subroutine .* redefined at/;
 };
-Test::Builder::Tester::color(1);
 
 
 sub run_tests {
 	my @test_files = @_;
 
 	my $tb = Test::More->builder;
-	$tb->reset();
 	eval {
 		for my $test_file (@test_files) {
+			$tb->reset();
 			delete $INC{$test_file};
 			require $test_file;
 		}
 	} or do {
 		print $@;
-	}
+	  }
 }
+
 
 sub clear_cache {
 	my @files = @_;
@@ -50,9 +50,31 @@ sub clear_cache {
 }
 
 
+sub expand_folders {
+	my @test_files = @_;
+
+	my @expanded_files;
+	for my $test (@test_files) {
+		if (-d $test) {
+			finddepth(
+				sub {
+					return if($_ eq '.' || $_ eq '..');
+					push @expanded_files, $File::Find::name;
+				},
+				$test
+			);
+		} else {
+			push @expanded_files, $test;
+		}
+	}
+
+	return grep { !-d } @expanded_files;
+}
+
+
 sub start {
 	my ($watch, $test_files) = @_;
-	my @test_files = @{$test_files};
+	my @test_files = expand_folders @{$test_files};
 
 	print "Running tests...\n";
 	run_tests(@test_files);

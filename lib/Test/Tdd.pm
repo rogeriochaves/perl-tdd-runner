@@ -59,4 +59,8 @@ You can also specify paths to add to INC and specific paths to watch
 
     provetdd -Ilib --watch lib/path,lib/path2 t/path/to/Test.t
 
+You can all run all tests in a folder
+
+    provetdd t/
+
 =cut
