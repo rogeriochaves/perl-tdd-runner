@@ -6,6 +6,7 @@ use Filesys::Notify::Simple;
 use Test::More;
 use Cwd 'cwd';
 use File::Find qw(finddepth);
+use Class::Unload;
 
 # Ignore warnings for subroutines redefined, source: https://www.perlmonks.org/bare/?node_id=539512
 $SIG{__WARN__} = sub{
@@ -44,6 +45,11 @@ sub clear_cache {
 			next unless $module_key;
 
 			delete $INC{$module_key};
+
+			my $class = $module_key;
+			$class =~ s/\//::/g;
+			$class =~ s/\.pm//g;
+			Class::Unload->unload($class);
 		}
 		require $file;
 	}
