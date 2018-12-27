@@ -50,8 +50,6 @@ sub clear_cache {
 			my $class = $module_key;
 			$class =~ s/\//::/g;
 			$class =~ s/\.pm//g;
-			use Data::Dumper;
-			print STDERR '$class: ', Dumper($class), "\n";
 			Class::MOP::remove_metaclass_by_name($class);
 		}
 		require ($module_key || $file);
