@@ -8,7 +8,7 @@ use Module::ImmutableMooseClass;
 use Sereal::Decoder;
 
 describe 'Test::Tdd::Generator' => sub {
-	before all => sub {
+	before each => sub {
 		system("rm -rf example/t/Module");
 	};
 
@@ -44,6 +44,14 @@ describe 'Test::Tdd::Generator' => sub {
 			is($input->{args}[0], "baz");
 			is($input->{args}[1], 123);
 			is($input->{args}[2]->counter, 5);
+		};
+
+		it 'dies for duplicated test' => sub {
+			my $err;
+			eval {Module::Untested::untested_subroutine("baz", 123);} or do {
+				$err = $@;
+			};
+			ok($err =~ /Test 'returns params plus foo' already exists on example\/t\/Module\/Untested\.t/);
 		};
 	};
 };

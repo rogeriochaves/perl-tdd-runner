@@ -28,6 +28,8 @@ sub create_test {
 	my $input = { args => \@args };
 	_save_input($test_file, $test_description, $input);
 
+	die "Test '$test_description' already exists on $test_file" if _test_exists($test_file, $test_description);
+
 	open(my $fh, '>', $test_file) or die "Could not open file '$test_file'";
 	my $content = <<"END_TXT";
 use strict;
@@ -78,6 +80,18 @@ sub _save_input {
 	$test_description =~ s/ /_/g;
 	my $test_file_base = basename($test_file, ".t");
 	Sereal::Encoder->encode_to_file("$inputs_folder/$test_file_base\_$test_description.sereal", $input);
+}
+
+
+sub _test_exists {
+	my ($test_file, $test_description) = @_;
+	if (-e $test_file) {
+		open FILE, $test_file;
+		my $content = join "", <FILE>;
+		close FILE;
+		return $content =~ /it '$test_description'/;
+	}
+	return;
 }
 
 1;
