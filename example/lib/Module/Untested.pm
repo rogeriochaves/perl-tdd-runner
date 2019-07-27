@@ -7,12 +7,12 @@ use Test::Tdd::Generator;
 $Global::VARIABLE = 'foo';
 
 
-sub foo {
-	my $params = @_;
+sub untested_subroutine {
+	my @params = @_;
 
-	Test::Tdd::Generator::create_test();
+	Test::Tdd::Generator::create_test('returns params plus foo');
 
-	return $params . $Global::VARIABLE;
+	return join(',', @params) . $Global::VARIABLE;
 }
 
 1;

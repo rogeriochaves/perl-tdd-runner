@@ -61,3 +61,9 @@ export PERL5LIB="$PERL5LIB:$(pwd)/lib"
 cd example
 provetdd --watch lib t/Test.t
 ```
+
+And test with:
+
+```bash
+provetdd --watch lib,t,example/lib t/Test/Tdd/Generator.t
+```
