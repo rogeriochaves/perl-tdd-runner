@@ -8,6 +8,7 @@ use File::Path qw/make_path/;
 use Devel::Caller::Perl qw/called_args/;
 use Sereal qw(encode_sereal);
 use Sereal::Encoder;
+use Term::ANSIColor;
 
 
 sub create_test {
@@ -26,11 +27,17 @@ sub create_test {
 
 	my @args = called_args(0);
 	my $input = { args => \@args };
-	_save_input($test_file, $test_description, $input);
+	my $input_file = _save_input($test_file, $test_description, $input);
 
-	die "Test '$test_description' already exists on $test_file" if _test_exists($test_file, $test_description);
+	my $test_body = <<"END_TXT";
+    it '$test_description' => sub {
+        my \$input = Sereal::Decoder->decode_from_file(dirname(__FILE__) . "/input/$input_file");
+        my \$result = $subroutine(\@{\$input->{args}});
 
-	open(my $fh, '>', $test_file) or die "Could not open file '$test_file'";
+        is(\$result, "fixme");
+    };
+END_TXT
+
 	my $content = <<"END_TXT";
 use strict;
 use warnings;
@@ -41,20 +48,25 @@ use File::Basename qw/dirname/;
 use Sereal::Decoder;
 
 describe '$package' => sub {
-  it '$test_description' => sub {
-    my \$input = Sereal::Decoder->decode_from_file(dirname(__FILE__) . "/input/Untested_returns_params_plus_foo.sereal");
-    my \$result = $subroutine(\@{\$input->{args}});
-
-    is(\$result, "fixme");
-  };
+$test_body
 };
 
 runtests;
 END_TXT
+
+	if (-e $test_file) {
+		die "Test 'returns params plus foo' already exists on $test_file" if _test_exists($test_file, $test_description);
+		open FILE, "example/t/Module/Untested.t";
+		$content = join "", <FILE>;
+		close FILE;
+		$content =~ s/(\};\n\nruntests)/$test_body$1/;
+	}
+
+	open(my $fh, '>', $test_file) or die "Could not open file '$test_file'";
 	print $fh $content;
 	close $fh;
 
-	print "Test created: $test_file\n";
+	print color("green"), "Test created at $test_file:", color("reset"), "\n\n$test_body\n\n";
 }
 
 
@@ -79,19 +91,21 @@ sub _save_input {
 	make_path $inputs_folder;
 	$test_description =~ s/ /_/g;
 	my $test_file_base = basename($test_file, ".t");
-	Sereal::Encoder->encode_to_file("$inputs_folder/$test_file_base\_$test_description.sereal", $input);
+	my $input_file = "$test_file_base\_$test_description.sereal";
+	Sereal::Encoder->encode_to_file("$inputs_folder/$input_file", $input);
+
+	return $input_file;
 }
 
 
 sub _test_exists {
 	my ($test_file, $test_description) = @_;
-	if (-e $test_file) {
-		open FILE, $test_file;
-		my $content = join "", <FILE>;
-		close FILE;
-		return $content =~ /it '$test_description'/;
-	}
-	return;
+
+	open FILE, $test_file;
+	my $content = join "", <FILE>;
+	close FILE;
+
+	return $content =~ /it '$test_description'/;
 }
 
 1;

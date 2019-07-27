@@ -6,6 +6,9 @@ use Test::Spec;
 use Module::Untested;
 use Module::ImmutableMooseClass;
 use Sereal::Decoder;
+use File::Spec;
+
+open STDOUT, '>', File::Spec->devnull();
 
 describe 'Test::Tdd::Generator' => sub {
 	before each => sub {
@@ -53,6 +56,17 @@ describe 'Test::Tdd::Generator' => sub {
 			};
 			ok($err =~ /Test 'returns params plus foo' already exists on example\/t\/Module\/Untested\.t/);
 		};
+
+		it 'appends additional tests' => sub {
+			Module::Untested::another_untested_subroutine("ya");
+
+			open FILE, "example/t/Module/Untested.t";
+			my $content = join "", <FILE>;
+			close FILE;
+
+			ok($content =~ /it 'returns the first param'/);
+			ok($content =~ /it 'returns params plus foo'/);
+		  }
 	};
 };
 

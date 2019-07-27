@@ -15,4 +15,11 @@ sub untested_subroutine {
 	return join(',', @params) . $Global::VARIABLE;
 }
 
+
+sub another_untested_subroutine {
+	Test::Tdd::Generator::create_test('returns the first param');
+
+	return $_[0];
+}
+
 1;
