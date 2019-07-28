@@ -31,9 +31,11 @@ sub create_test {
 	my $input = { args => \@args, globals => $globals };
 	my $input_file = _save_input($test_file, $test_description, $input);
 
+	my $global_expansion = "";
+	$global_expansion = "\n        Test::Tdd::Generator::expand_globals(\$input->{globals});\n" if defined $opts->{globals};
 	my $test_body = <<"END_TXT";
     it '$test_description' => sub {
-        my \$input = Sereal::Decoder->decode_from_file(dirname(__FILE__) . "/input/$input_file");
+        my \$input = Sereal::Decoder->decode_from_file(dirname(__FILE__) . "/input/$input_file");$global_expansion
         my \$result = $subroutine(\@{\$input->{args}});
 
         is(\$result, "fixme");
@@ -45,6 +47,7 @@ use strict;
 use warnings;
 
 use Test::Spec;
+use Test::Tdd::Generator;
 use $package;
 use File::Basename qw/dirname/;
 use Sereal::Decoder;

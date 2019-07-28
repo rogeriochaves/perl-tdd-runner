@@ -121,6 +121,14 @@ describe 'Test::Tdd::Generator' => sub {
 
 			is($Example::VARIABLE, 'foo');
 		};
+
+		it 'expands globals on the test' => sub {
+			open FILE, "example/t/Module/Untested.t";
+			my $content = join "", <FILE>;
+			close FILE;
+
+			ok($content =~ /Test::Tdd::Generator::expand_globals\(\$input->\{globals\}\)/);
+		};
 	};
 };
 
