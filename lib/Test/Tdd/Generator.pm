@@ -108,4 +108,40 @@ sub _test_exists {
 	return $content =~ /it '$test_description'/;
 }
 
+
+sub _get_globals {
+	my @globals_names = @_;
+
+	return { map { $_ => _get_global_var($_) } @globals_names };
+}
+
+
+sub _get_global_var {
+	my $name = shift;
+
+	my $global_var = eval "\$$name";
+	if ($global_var) {
+		return $global_var;
+	} else {
+		my %global_map = eval "\%$name";
+		%global_map = map { ($_ => _get_global_var($name . $_) ) } (keys %global_map);
+		return \%global_map;
+	}
+}
+
+
+sub expand_globals {
+	my ($globals, $parent) = @_;
+	$parent ||= '';
+
+	for my $key (keys %{$globals}) {
+		my $value = $globals->{$key};
+		if ($key =~ /::$/) {
+			expand_globals($value, $parent . $key);
+		} else {
+			eval("\$$parent$key = \$value");
+		}
+	}
+}
+
 1;

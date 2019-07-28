@@ -4,15 +4,15 @@ use strict;
 use warnings;
 use Test::Tdd::Generator;
 
-$Global::VARIABLE = 'foo';
+$Example::VARIABLE = 'foo';
 
 
 sub untested_subroutine {
 	my @params = @_;
 
-	Test::Tdd::Generator::create_test('returns params plus foo');
+	Test::Tdd::Generator::create_test('returns params plus foo', { globals => ['$Example::'] });
 
-	return join(',', @params) . $Global::VARIABLE;
+	return join(',', @params) . $Example::VARIABLE;
 }
 
 

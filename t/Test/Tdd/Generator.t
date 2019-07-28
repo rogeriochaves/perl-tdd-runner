@@ -2,7 +2,9 @@ use strict;
 use warnings;
 use lib qw(./lib ./example/lib);
 
+use Test::Tdd::Generator;
 use Test::Spec;
+use Test::Differences;
 use Module::Untested;
 use Module::ImmutableMooseClass;
 use Sereal::Decoder;
@@ -19,6 +21,49 @@ describe 'Test::Tdd::Generator' => sub {
 		my ($test_path, $lib_path) = Test::Tdd::Generator::_find_test_and_lib_folders("example/lib/Module/Untested.pm");
 		is($test_path, "example/t");
 		is($lib_path, "example/lib");
+	};
+
+	describe 'global variables' => sub {
+		it 'gets global variables' => sub {
+			$Global::FOO = "foo";
+			$Global::BAR = "bar";
+
+			my $result = Test::Tdd::Generator::_get_globals('Global::');
+
+			eq_or_diff($result->{'Global::'}, {'FOO' => 'foo', 'BAR' => 'bar'});
+		};
+
+		it 'gets a specific global variable' => sub {
+			$Global::FOO = "foo";
+
+			my $result = Test::Tdd::Generator::_get_globals('Global::FOO');
+
+			is($result->{'Global::FOO'}, 'foo');
+		};
+
+		it 'gets nested globals' => sub {
+			$Nested::Global::FOO = "foo";
+
+			my $result = Test::Tdd::Generator::_get_globals('Nested::');
+
+			eq_or_diff($result->{'Nested::'}, {'Global::' => {'FOO' => 'foo'}});
+		};
+
+		it 'expands globals' => sub {
+			$Global::FOO = undef;
+
+			Test::Tdd::Generator::expand_globals({'Global::' => {'FOO' => 'foo'}});
+
+			is($Global::FOO, 'foo');
+		};
+
+		it 'expands nested globals' => sub {
+			$Nested::Global::FOO = undef;
+
+			Test::Tdd::Generator::expand_globals({'Nested::' => {'Global::' => {'FOO' => 'foo'}}});
+
+			is($Nested::Global::FOO, 'foo');
+		};
 	};
 
 	describe 'test generation' => sub {
