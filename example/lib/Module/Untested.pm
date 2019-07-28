@@ -10,7 +10,7 @@ $Example::VARIABLE = 'foo';
 sub untested_subroutine {
 	my @params = @_;
 
-	Test::Tdd::Generator::create_test('returns params plus foo', { globals => ['$Example::'] });
+	Test::Tdd::Generator::create_test('returns params plus foo', { globals => ['Example::'] });
 
 	return join(',', @params) . $Example::VARIABLE;
 }

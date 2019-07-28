@@ -12,7 +12,7 @@ use Term::ANSIColor;
 
 
 sub create_test {
-	my $test_description = shift;
+	my ($test_description, $opts) = @_;
 
 	my ($package, $filename) = caller(0);
 	my ($_package, $_filename, $_line, $subroutine) = caller(1);
@@ -26,7 +26,9 @@ sub create_test {
 	make_path dirname($test_file);
 
 	my @args = called_args(0);
-	my $input = { args => \@args };
+	my $globals = {};
+	$globals = _get_globals($opts->{globals}) if defined $opts->{globals};
+	my $input = { args => \@args, globals => $globals };
 	my $input_file = _save_input($test_file, $test_description, $input);
 
 	my $test_body = <<"END_TXT";
@@ -110,9 +112,9 @@ sub _test_exists {
 
 
 sub _get_globals {
-	my @globals_names = @_;
+	my ($globals_names) = @_;
 
-	return { map { $_ => _get_global_var($_) } @globals_names };
+	return { map { $_ => _get_global_var($_) } @$globals_names };
 }
 
 

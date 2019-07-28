@@ -28,7 +28,7 @@ describe 'Test::Tdd::Generator' => sub {
 			$Global::FOO = "foo";
 			$Global::BAR = "bar";
 
-			my $result = Test::Tdd::Generator::_get_globals('Global::');
+			my $result = Test::Tdd::Generator::_get_globals(['Global::']);
 
 			eq_or_diff($result->{'Global::'}, {'FOO' => 'foo', 'BAR' => 'bar'});
 		};
@@ -36,7 +36,7 @@ describe 'Test::Tdd::Generator' => sub {
 		it 'gets a specific global variable' => sub {
 			$Global::FOO = "foo";
 
-			my $result = Test::Tdd::Generator::_get_globals('Global::FOO');
+			my $result = Test::Tdd::Generator::_get_globals(['Global::FOO']);
 
 			is($result->{'Global::FOO'}, 'foo');
 		};
@@ -44,7 +44,7 @@ describe 'Test::Tdd::Generator' => sub {
 		it 'gets nested globals' => sub {
 			$Nested::Global::FOO = "foo";
 
-			my $result = Test::Tdd::Generator::_get_globals('Nested::');
+			my $result = Test::Tdd::Generator::_get_globals(['Nested::']);
 
 			eq_or_diff($result->{'Nested::'}, {'Global::' => {'FOO' => 'foo'}});
 		};
@@ -111,7 +111,16 @@ describe 'Test::Tdd::Generator' => sub {
 
 			ok($content =~ /it 'returns the first param'/);
 			ok($content =~ /it 'returns params plus foo'/);
-		  }
+		};
+
+		it 'dumps globals to a file' => sub {
+			$Example::VARIABLE = undef;
+
+			my $input = Sereal::Decoder->decode_from_file("example/t/Module/input/Untested_returns_params_plus_foo.sereal");
+			Test::Tdd::Generator::expand_globals($input->{globals});
+
+			is($Example::VARIABLE, 'foo');
+		};
 	};
 };
 
