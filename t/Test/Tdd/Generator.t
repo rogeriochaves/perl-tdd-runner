@@ -8,7 +8,7 @@ use Test::Differences;
 use Module::Untested;
 use Module::NoPermission::Untested;
 use Module::ImmutableMooseClass;
-use Sereal::Decoder;
+use Storable qw(retrieve);
 use File::Spec;
 
 open STDOUT, '>', File::Spec->devnull();
@@ -84,13 +84,13 @@ describe 'Test::Tdd::Generator' => sub {
 			close FILE;
 
 			ok($content =~ /it 'returns params plus foo'/);
-			ok($content =~ /my \$input = Sereal::Decoder->decode_from_file\(dirname\(__FILE__\) . "\/input\/Untested_returns_params_plus_foo\.sereal"\)/);
+			ok($content =~ /my \$input = Test::Tdd::Generator::retrieve\(dirname\(__FILE__\) . "\/input\/Untested_returns_params_plus_foo\.storable"\)/);
 			ok($content =~ /Module::Untested::untested_subroutine\(@\{\$input->\{args\}\}\)/);
 			ok($content =~ /is\(\$result, "fixme"\)/);
 		};
 
 		it 'dumps params to a file' => sub {
-			my $input = Sereal::Decoder->decode_from_file("example/t/Module/input/Untested_returns_params_plus_foo.sereal");
+			my $input = retrieve("example/t/Module/input/Untested_returns_params_plus_foo.storable");
 			is($input->{args}[0], "baz");
 			is($input->{args}[1], 123);
 			is($input->{args}[2]->counter, 5);
@@ -118,7 +118,7 @@ describe 'Test::Tdd::Generator' => sub {
 		it 'dumps globals to a file' => sub {
 			$Example::VARIABLE = undef;
 
-			my $input = Sereal::Decoder->decode_from_file("example/t/Module/input/Untested_returns_params_plus_foo.sereal");
+			my $input = retrieve("example/t/Module/input/Untested_returns_params_plus_foo.storable");
 			Test::Tdd::Generator::expand_globals($input->{globals});
 
 			is($Example::VARIABLE, 'foo');
@@ -141,8 +141,16 @@ describe 'Test::Tdd::Generator' => sub {
 
 			ok($content =~ /it 'creates test on tmp'/);
 
-			my $input = Sereal::Decoder->decode_from_file("/tmp/t/input/Untested_creates_test_on_tmp.sereal");
+			my $input = retrieve("/tmp/t/input/Untested_creates_test_on_tmp.storable");
 			is($input->{args}[0], "qux");
+		};
+
+		it 'serializes lambdas' => sub {
+			my $lambda = sub { return "foo" };
+			Module::Untested::another_untested_subroutine($lambda);
+
+			my $input = retrieve("example/t/Module/input/Untested_returns_the_first_param.storable");
+			is($input->{args}[0]->(), "foo");
 		};
 	};
 };

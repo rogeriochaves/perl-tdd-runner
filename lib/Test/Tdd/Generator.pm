@@ -3,12 +3,14 @@ package Test::Tdd::Generator;
 use strict;
 use warnings;
 
-use File::Basename qw/dirname basename/;
-use File::Path qw/make_path/;
-use Devel::Caller::Perl qw/called_args/;
-use Sereal qw(encode_sereal);
-use Sereal::Encoder;
+use File::Basename qw(dirname basename);
+use File::Path qw(make_path);
+use Devel::Caller::Perl qw(called_args);
 use Term::ANSIColor;
+use Storable;
+
+$Storable::Deparse = 1;
+$Storable::Eval = 1;
 
 
 sub create_test {
@@ -41,7 +43,7 @@ sub create_test {
 	$global_expansion = "\n        Test::Tdd::Generator::expand_globals(\$input->{globals});\n" if defined $opts->{globals};
 	my $test_body = <<"END_TXT";
     it '$test_description' => sub {
-        my \$input = Sereal::Decoder->decode_from_file(dirname(__FILE__) . "/input/$input_file");$global_expansion
+        my \$input = Test::Tdd::Generator::retrieve(dirname(__FILE__) . "/input/$input_file");$global_expansion
         my \$result = $subroutine(\@{\$input->{args}});
 
         is(\$result, "fixme");
@@ -56,7 +58,6 @@ use Test::Spec;
 use Test::Tdd::Generator;
 use $package;
 use File::Basename qw/dirname/;
-use Sereal::Decoder;
 
 describe '$package' => sub {
 $test_body
@@ -118,8 +119,8 @@ sub _save_input {
 	make_path $inputs_folder;
 	$test_description =~ s/ /_/g;
 	my $test_file_base = basename($test_file, ".t");
-	my $input_file = "$test_file_base\_$test_description.sereal";
-	Sereal::Encoder->encode_to_file("$inputs_folder/$input_file", $input);
+	my $input_file = "$test_file_base\_$test_description.storable";
+	Storable::store($input, "$inputs_folder/$input_file");
 
 	return $input_file;
 }
@@ -169,6 +170,11 @@ sub expand_globals {
 			eval("\$$parent$key = \$value");
 		}
 	}
+}
+
+
+sub retrieve {
+	return Storable::retrieve(@_);
 }
 
 1;
