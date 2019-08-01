@@ -65,5 +65,6 @@ provetdd --watch lib t/Test.t
 And test with:
 
 ```bash
+chmod -R 555 example/lib/Module/NoPermission/t
 provetdd --watch lib,t,example/lib t/Test/Tdd/Generator.t
 ```

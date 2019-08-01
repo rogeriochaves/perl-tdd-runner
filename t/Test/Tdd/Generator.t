@@ -6,6 +6,7 @@ use Test::Tdd::Generator;
 use Test::Spec;
 use Test::Differences;
 use Module::Untested;
+use Module::NoPermission::Untested;
 use Module::ImmutableMooseClass;
 use Sereal::Decoder;
 use File::Spec;
@@ -15,6 +16,7 @@ open STDOUT, '>', File::Spec->devnull();
 describe 'Test::Tdd::Generator' => sub {
 	before each => sub {
 		system("rm -rf example/t/Module");
+		system("rm -rf /tmp/t");
 	};
 
 	it 'finds test folder' => sub {
@@ -128,6 +130,19 @@ describe 'Test::Tdd::Generator' => sub {
 			close FILE;
 
 			ok($content =~ /Test::Tdd::Generator::expand_globals\(\$input->\{globals\}\)/);
+		};
+
+		it 'creates a test in the test file in /tmp when there is no permission to create on the actual folder' => sub {
+			Module::NoPermission::Untested::untested_subroutine("qux");
+
+			open FILE, "/tmp/t/Untested.t";
+			my $content = join "", <FILE>;
+			close FILE;
+
+			ok($content =~ /it 'creates test on tmp'/);
+
+			my $input = Sereal::Decoder->decode_from_file("/tmp/t/input/Untested_creates_test_on_tmp.sereal");
+			is($input->{args}[0], "qux");
 		};
 	};
 };

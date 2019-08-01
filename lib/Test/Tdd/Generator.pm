@@ -18,6 +18,12 @@ sub create_test {
 	my ($_package, $_filename, $_line, $subroutine) = caller(1);
 	my ($test_path, $lib_path) = _find_test_and_lib_folders($filename);
 
+	my $actual_test_path;
+	if (not -w $test_path) {
+		$actual_test_path = $test_path;
+		$test_path = "/tmp/t";
+	}
+
 	my $test_file = $filename;
 	$test_file =~ s/$lib_path//;
 	$test_file =~ s/\.pm$/\.t/;
@@ -71,19 +77,35 @@ END_TXT
 	print $fh $content;
 	close $fh;
 
-	print color("green"), "Test created at $test_file:", color("reset"), "\n\n$test_body\n\n";
+	print _get_instructions($test_file, $test_body, $test_path, $actual_test_path);
+}
+
+
+sub _get_instructions {
+	my ($test_file, $test_body, $test_path, $actual_test_path) = @_;
+
+	my $run_instructions = color("green") . "Run it with:" . color("reset") . "\n\n    provetdd $test_file\n\n";
+	my $move_instructions = "";
+	if ($actual_test_path) {
+		my $path_to_copy = dirname($actual_test_path);
+		$move_instructions = color("green") . "To copy it to the correct place run:" . color("reset") . "\n\n    cp -R /tmp/t $path_to_copy\n\n";
+		$run_instructions =~ s/$test_path/$actual_test_path/;
+	}
+
+	return color("green") . "Test created at $test_file:" . color("reset") . "\n\n$test_body\n" . $move_instructions . $run_instructions;
 }
 
 
 sub _find_test_and_lib_folders {
 	my ($path) = @_;
 
-	my $dir = $path;
+	my $dir = dirname($path);
+	my $previous = $dir;
 	while ($dir ne '.') {
-		my $base = dirname($dir);
-		my $test_folder = "$base/t";
-		return ($test_folder, $dir) if -d $test_folder;
-		$dir = $base;
+		my $test_folder = "$dir/t";
+		return ($test_folder, $previous) if -d $test_folder;
+		$previous = $dir;
+		$dir = dirname($dir);
 	}
 	die "Could not find t/ folder put the tests, searched in $path";
 }
