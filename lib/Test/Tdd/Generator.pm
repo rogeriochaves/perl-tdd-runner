@@ -44,7 +44,7 @@ sub create_test {
 	$global_expansion = "\n        Test::Tdd::Generator::expand_globals(\$input->{globals});\n" if defined $opts->{globals};
 	my $test_body = <<"END_TXT";
     it '$test_description' => sub {
-        my \$input = Test::Tdd::Generator::retrieve(dirname(__FILE__) . "/input/$input_file");$global_expansion
+        my \$input = Test::Tdd::Generator::load_input(dirname(__FILE__) . "/input/$input_file");$global_expansion
         my \$result = $subroutine(\@{\$input->{args}});
 
         is(\$result, "fixme");
@@ -174,7 +174,7 @@ sub expand_globals {
 }
 
 
-sub retrieve {
+sub load_input {
 	return Storable::retrieve(@_);
 }
 
