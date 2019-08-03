@@ -5,6 +5,7 @@ use warnings;
 
 use File::Basename qw(dirname basename);
 use File::Path qw(make_path);
+use File::Slurp qw(read_file write_file);
 use Devel::Caller::Perl qw(called_args);
 use Term::ANSIColor;
 use Storable;
@@ -70,15 +71,11 @@ END_TXT
 		if (_test_exists($test_file, $test_description)) {
 			die "Test 'returns params plus foo' already exists on $test_file, please remove the create_test() line otherwise the test file would be recreated everytime you run the tests";
 		}
-		open FILE, "example/t/Module/Untested.t";
-		$content = join "", <FILE>;
-		close FILE;
+		$content = read_file($test_file);
 		$content =~ s/(\};\n\nruntests)/$test_body$1/;
 	}
 
-	open(my $fh, '>', $test_file) or die "Could not open file '$test_file'";
-	print $fh $content;
-	close $fh;
+	write_file($test_file, $content);
 
 	print _get_instructions($test_file, $test_body, $test_path, $actual_test_path);
 }
@@ -125,14 +122,9 @@ sub _save_input {
 	my $input_file_path = "$inputs_folder/$input_file";
 	Storable::store($input, $input_file_path);
 
-	open FILE, $input_file_path;
-	my $content = join "", <FILE>;
-	close FILE;
-
+	my $content = read_file($input_file_path);
 	$content =~ s/use strict;/no strict; /g; # the space at the end it because it need the same amount of characters due to binary format
-	open(my $fh, '>', $input_file_path) or die "Could not open file '$input_file_path'";
-	print $fh $content;
-	close $fh;
+	write_file($input_file_path, $content);
 
 	return $input_file;
 }
@@ -141,10 +133,7 @@ sub _save_input {
 sub _test_exists {
 	my ($test_file, $test_description) = @_;
 
-	open FILE, $test_file;
-	my $content = join "", <FILE>;
-	close FILE;
-
+	my $content = read_file($test_file);
 	return $content =~ /it '$test_description'/;
 }
 
