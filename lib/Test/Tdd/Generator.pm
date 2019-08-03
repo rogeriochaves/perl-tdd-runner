@@ -67,7 +67,9 @@ runtests;
 END_TXT
 
 	if (-e $test_file) {
-		die "Test 'returns params plus foo' already exists on $test_file" if _test_exists($test_file, $test_description);
+		if (_test_exists($test_file, $test_description)) {
+			die "Test 'returns params plus foo' already exists on $test_file, please remove the create_test() line otherwise the test file would be recreated everytime you run the tests";
+		}
 		open FILE, "example/t/Module/Untested.t";
 		$content = join "", <FILE>;
 		close FILE;
