@@ -8,7 +8,6 @@ use Test::Differences;
 use Module::Untested;
 use Module::NoPermission::Untested;
 use Module::ImmutableMooseClass;
-use Storable qw(retrieve);
 use File::Spec;
 
 open STDOUT, '>', File::Spec->devnull();
@@ -90,7 +89,7 @@ describe 'Test::Tdd::Generator' => sub {
 		};
 
 		it 'dumps params to a file' => sub {
-			my $input = retrieve("example/t/Module/input/Untested_returns_params_plus_foo.storable");
+			my $input = Test::Tdd::Generator::retrieve("example/t/Module/input/Untested_returns_params_plus_foo.storable");
 			is($input->{args}[0], "baz");
 			is($input->{args}[1], 123);
 			is($input->{args}[2]->counter, 5);
@@ -118,7 +117,7 @@ describe 'Test::Tdd::Generator' => sub {
 		it 'dumps globals to a file' => sub {
 			$Example::VARIABLE = undef;
 
-			my $input = retrieve("example/t/Module/input/Untested_returns_params_plus_foo.storable");
+			my $input = Test::Tdd::Generator::retrieve("example/t/Module/input/Untested_returns_params_plus_foo.storable");
 			Test::Tdd::Generator::expand_globals($input->{globals});
 
 			is($Example::VARIABLE, 'foo');
@@ -141,7 +140,7 @@ describe 'Test::Tdd::Generator' => sub {
 
 			ok($content =~ /it 'creates test on tmp'/);
 
-			my $input = retrieve("/tmp/t/input/Untested_creates_test_on_tmp.storable");
+			my $input = Test::Tdd::Generator::retrieve("/tmp/t/input/Untested_creates_test_on_tmp.storable");
 			is($input->{args}[0], "qux");
 		};
 
@@ -149,8 +148,19 @@ describe 'Test::Tdd::Generator' => sub {
 			my $lambda = sub { return "foo" };
 			Module::Untested::another_untested_subroutine($lambda);
 
-			my $input = retrieve("example/t/Module/input/Untested_returns_the_first_param.storable");
+			my $input = Test::Tdd::Generator::retrieve("example/t/Module/input/Untested_returns_the_first_param.storable");
 			is($input->{args}[0]->(), "foo");
+		};
+
+		it 'serializes lambdas with out-of-scope variables' => sub {
+			my $foo = "bar";
+			my $lambda = sub { return $foo };
+			Module::Untested::another_untested_subroutine($lambda);
+
+			my $input = Test::Tdd::Generator::retrieve("example/t/Module/input/Untested_returns_the_first_param.storable");
+
+			# it will be undef but at least the deserialization doesn't die
+			is($input->{args}[0]->(), undef);
 		};
 	};
 };

@@ -122,7 +122,17 @@ sub _save_input {
 	$test_description =~ s/ /_/g;
 	my $test_file_base = basename($test_file, ".t");
 	my $input_file = "$test_file_base\_$test_description.storable";
-	Storable::store($input, "$inputs_folder/$input_file");
+	my $input_file_path = "$inputs_folder/$input_file";
+	Storable::store($input, $input_file_path);
+
+	open FILE, $input_file_path;
+	my $content = join "", <FILE>;
+	close FILE;
+
+	$content =~ s/use strict;/no strict; /g; # the space at the end it because it need the same amount of characters due to binary format
+	open(my $fh, '>', $input_file_path) or die "Could not open file '$input_file_path'";
+	print $fh $content;
+	close $fh;
 
 	return $input_file;
 }
