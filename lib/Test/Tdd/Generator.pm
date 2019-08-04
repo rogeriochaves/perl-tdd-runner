@@ -8,10 +8,7 @@ use File::Path qw(make_path);
 use File::Slurp qw(read_file write_file);
 use Devel::Caller::Perl qw(called_args);
 use Term::ANSIColor;
-use Storable;
-
-$Storable::Deparse = 1;
-$Storable::Eval = 1;
+use Data::Dumper;
 
 
 sub create_test {
@@ -118,13 +115,14 @@ sub _save_input {
 	make_path $inputs_folder;
 	$test_description =~ s/ /_/g;
 	my $test_file_base = basename($test_file, ".t");
-	my $input_file = "$test_file_base\_$test_description.storable";
+	my $input_file = "$test_file_base\_$test_description.dump";
 	my $input_file_path = "$inputs_folder/$input_file";
-	Storable::store($input, $input_file_path);
 
-	my $content = read_file($input_file_path);
-	$content =~ s/use strict;/no strict; /g; # the space at the end it because it need the same amount of characters due to binary format
-	write_file($input_file_path, $content);
+	local $Data::Dumper::Deparse = 1;
+	local $Data::Dumper::Maxrecurse = 0;
+	my $dumped = Dumper($input);
+	$dumped =~ s/use strict/no strict/g;
+	write_file($input_file_path, $dumped);
 
 	return $input_file;
 }
@@ -175,7 +173,10 @@ sub expand_globals {
 
 
 sub load_input {
-	return Storable::retrieve(@_);
+	my $VAR1;
+	eval read_file(@_) or die $@;
+
+	return $VAR1;
 }
 
 1;

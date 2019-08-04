@@ -83,13 +83,13 @@ describe 'Test::Tdd::Generator' => sub {
 			close FILE;
 
 			ok($content =~ /it 'returns params plus foo'/);
-			ok($content =~ /my \$input = Test::Tdd::Generator::load_input\(dirname\(__FILE__\) . "\/input\/Untested_returns_params_plus_foo\.storable"\)/);
+			ok($content =~ /my \$input = Test::Tdd::Generator::load_input\(dirname\(__FILE__\) . "\/input\/Untested_returns_params_plus_foo\.dump"\)/);
 			ok($content =~ /Module::Untested::untested_subroutine\(@\{\$input->\{args\}\}\)/);
 			ok($content =~ /is\(\$result, "fixme"\)/);
 		};
 
 		it 'dumps params to a file' => sub {
-			my $input = Test::Tdd::Generator::load_input("example/t/Module/input/Untested_returns_params_plus_foo.storable");
+			my $input = Test::Tdd::Generator::load_input("example/t/Module/input/Untested_returns_params_plus_foo.dump");
 			is($input->{args}[0], "baz");
 			is($input->{args}[1], 123);
 			is($input->{args}[2]->counter, 5);
@@ -117,7 +117,7 @@ describe 'Test::Tdd::Generator' => sub {
 		it 'dumps globals to a file' => sub {
 			$Example::VARIABLE = undef;
 
-			my $input = Test::Tdd::Generator::load_input("example/t/Module/input/Untested_returns_params_plus_foo.storable");
+			my $input = Test::Tdd::Generator::load_input("example/t/Module/input/Untested_returns_params_plus_foo.dump");
 			Test::Tdd::Generator::expand_globals($input->{globals});
 
 			is($Example::VARIABLE, 'foo');
@@ -140,7 +140,7 @@ describe 'Test::Tdd::Generator' => sub {
 
 			ok($content =~ /it 'creates test on tmp'/);
 
-			my $input = Test::Tdd::Generator::load_input("/tmp/t/input/Untested_creates_test_on_tmp.storable");
+			my $input = Test::Tdd::Generator::load_input("/tmp/t/input/Untested_creates_test_on_tmp.dump");
 			is($input->{args}[0], "qux");
 		};
 
@@ -148,7 +148,7 @@ describe 'Test::Tdd::Generator' => sub {
 			my $lambda = sub { return "foo" };
 			Module::Untested::another_untested_subroutine($lambda);
 
-			my $input = Test::Tdd::Generator::load_input("example/t/Module/input/Untested_returns_the_first_param.storable");
+			my $input = Test::Tdd::Generator::load_input("example/t/Module/input/Untested_returns_the_first_param.dump");
 			is($input->{args}[0]->(), "foo");
 		};
 
@@ -157,7 +157,7 @@ describe 'Test::Tdd::Generator' => sub {
 			my $lambda = sub { return $foo };
 			Module::Untested::another_untested_subroutine($lambda);
 
-			my $input = Test::Tdd::Generator::load_input("example/t/Module/input/Untested_returns_the_first_param.storable");
+			my $input = Test::Tdd::Generator::load_input("example/t/Module/input/Untested_returns_the_first_param.dump");
 
 			# it will be undef but at least the deserialization doesn't die
 			is($input->{args}[0]->(), undef);
