@@ -10,6 +10,7 @@ use Module::NoPermission::Untested;
 use Module::ImmutableMooseClass;
 use File::Spec;
 
+open(my $ORIGSTDOUT, ">&", STDOUT) and close(STDOUT);
 open STDOUT, '>', File::Spec->devnull();
 
 describe 'Test::Tdd::Generator' => sub {
@@ -161,6 +162,20 @@ describe 'Test::Tdd::Generator' => sub {
 
 			# it will be undef but at least the deserialization doesn't die
 			is($input->{args}[0]->(), undef);
+		};
+
+		it 'ignores Devel::Peek dumps' => sub {
+			my $lambda = sub {
+				use Devel::Peek;
+				Devel::Peek::Dump("foo");
+				print STDERR "this one is fine\n";
+			};
+			Module::Untested::another_untested_subroutine($lambda);
+
+			open(STDOUT, ">&=" . fileno($ORIGSTDOUT));
+			my $input = Test::Tdd::Generator::load_input("example/t/Module/input/Untested_returns_the_first_param.dump");
+			$input->{args}[0]->(); # no assertion, just check Devel::Peek outputs are not on the console
+			open STDOUT, '>', File::Spec->devnull();
 		};
 	};
 };
