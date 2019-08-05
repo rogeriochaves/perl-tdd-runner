@@ -181,3 +181,51 @@ sub load_input {
 }
 
 1;
+
+
+=head1 NAME
+
+Test::Tdd::Generator - Generate tests for existing code
+
+=head1 SYNOPSIS
+
+Add those lines inside the function you want to generate a test for:
+
+    use Test::Tdd::Generator;
+    Test::Tdd::Generator::create_test('<test description>');
+
+If you also need some globals you can include them like this:
+
+    use Test::Tdd::Generator;
+    Test::Tdd::Generator::create_test('<test description>', { globals => ['Example::'] });
+
+This will generate a test like this
+
+		it '<test description>' => sub {
+				my $input = Test::Tdd::Generator::load_input(dirname(__FILE__) . "/input/MyModule_does_something.dump");
+				Test::Tdd::Generator::expand_globals($input->{globals});
+
+				my $result = MyModule::untested_subroutine(@{$input->{args}});
+
+				is($result, "fixme");
+		};
+
+=head2 Methods
+
+=over 4
+
+=item I<PACKAGE>::create_test(I<$test_description [>, I<$opts]>)
+
+Creates a test on the closest t/ folder, saving the original inputs that the function received as well. You can also save globals you might need passing them on $opts, check the example above
+
+=item I<PACKAGE>::load_input(I<$dump_file>)
+
+Evaluates a dump file to load the inputs on the test to be able to call the function
+
+=item I<PACKAGE>::expand_globals(I<$globals>)
+
+Expand globals that were exported to run the tests
+
+=back
+
+=cut
