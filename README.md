@@ -93,6 +93,9 @@ provetdd --watch lib t/Test.t
 And test with:
 
 ```bash
-chmod -R 555 example/lib/Module/NoPermission/t
 provetdd --watch lib,t,example/lib t/Test/Tdd/Generator.t
 ```
+
+To release a new version, follow this tutorial:
+
+http://dzil.org/tutorial/release.html
