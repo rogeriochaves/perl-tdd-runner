@@ -173,7 +173,7 @@ sub expand_globals {
 
 
 sub load_input {
-	open(STDERR, "|-", 'perl -pe "s/^\s*[A-Z]+ = .*\n//g"');
+	open(STDERR, "|-", 'perl -pe "s/^\s*[A-Z_]+ = .*\n//g"');
 	my $VAR1;
 	eval read_file(@_) or die $@;
 
