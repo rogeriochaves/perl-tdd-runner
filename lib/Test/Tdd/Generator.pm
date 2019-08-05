@@ -1,3 +1,12 @@
+package DB;
+
+
+sub called_args {
+	my ($level) = @_;
+	my @foo = caller( $level + 2 );
+	return @DB::args;
+}
+
 package Test::Tdd::Generator;
 
 use strict;
@@ -6,7 +15,6 @@ use warnings;
 use File::Basename qw(dirname basename);
 use File::Path qw(make_path);
 use File::Slurp qw(read_file write_file);
-use Devel::Caller::Perl qw(called_args);
 use Term::ANSIColor;
 use Data::Dumper;
 
@@ -29,9 +37,13 @@ sub create_test {
 	$test_file =~ s/\.pm$/\.t/;
 	$test_file = $test_path . $test_file;
 
+	if (-e $test_file && _test_exists($test_file, $test_description)) {
+		die "Test 'returns params plus foo' already exists on $test_file, please remove the create_test() line otherwise the test file would be recreated everytime you run the tests";
+	}
+
 	make_path dirname($test_file);
 
-	my @args = called_args(0);
+	my @args = DB::called_args(0);
 	my $globals = {};
 	$globals = _get_globals($opts->{globals}) if defined $opts->{globals};
 	my $input = { args => \@args, globals => $globals };
@@ -65,9 +77,6 @@ runtests;
 END_TXT
 
 	if (-e $test_file) {
-		if (_test_exists($test_file, $test_description)) {
-			die "Test 'returns params plus foo' already exists on $test_file, please remove the create_test() line otherwise the test file would be recreated everytime you run the tests";
-		}
 		$content = read_file($test_file);
 		$content =~ s/(\};\n\nruntests)/$test_body$1/;
 	}
