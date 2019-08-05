@@ -166,10 +166,11 @@ describe 'Test::Tdd::Generator' => sub {
 		};
 
 		it 'ignores Devel::Peek dumps' => sub {
+			print STDERR "this one is fine\n";
 			my $lambda = sub {
 				use Devel::Peek;
 				Devel::Peek::Dump("foo");
-				print STDERR "this one is fine\n";
+				print STDERR "this one is also fine\n";
 			};
 			Module::Untested::another_untested_subroutine($lambda);
 

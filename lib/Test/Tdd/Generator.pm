@@ -182,12 +182,22 @@ sub expand_globals {
 
 
 sub load_input {
-	open(STDERR, "|-", 'perl -pe "s/^\s*[A-Z_]+ = .*\n//g"');
 	my $VAR1;
 	eval read_file(@_) or die $@;
 
 	return $VAR1;
 }
+
+# Source: https://www.perlmonks.org/?node_id=209819
+sub _attach_stderr_filter {
+	my $pid = open(STDERR, '|-');
+	defined $pid or die "Cannot fork: $!\n";
+	return if $pid;
+
+	while (<STDIN>) { s/^\s*[A-Z_]+ = .*\n//g; print STDERR "$_"; }
+}
+
+_attach_stderr_filter();
 
 1;
 
