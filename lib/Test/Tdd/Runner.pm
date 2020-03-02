@@ -86,6 +86,7 @@ sub start {
 	print "Running tests...\n";
 	run_tests(@test_files);
 
+	print "\nWatching for changes on ", (join ",", @{$watch}), ". Press CTRL+C to stop running tests.\n";
 	my $watcher = Filesys::Notify::Simple->new([@{$watch}, @{$test_files}]);
 	while (1) {
 		$watcher->wait(
