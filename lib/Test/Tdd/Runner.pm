@@ -78,10 +78,11 @@ sub expand_folders {
 	return grep { !-d } @expanded_files;
 }
 
-
 sub start {
 	my ($watch, $test_files) = @_;
 	my @test_files = expand_folders @{$test_files};
+
+	$ENV{IS_PROVETDD} = 1;
 
 	print "Running tests...\n";
 	run_tests(@test_files);
