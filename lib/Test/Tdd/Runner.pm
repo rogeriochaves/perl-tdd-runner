@@ -14,6 +14,14 @@ $SIG{__WARN__} = sub{
 	warn $warning unless $warning =~ /Subroutine .* redefined at/;
 };
 
+sub extract_run_command {
+	my ($test_definition) = @_;
+
+	if ($test_definition =~ /(runtests\(?.*?\)?)[ \t\n]+unless caller/) {
+		return $1;
+	}
+	return undef;
+}
 
 sub run_tests {
 	my @test_files = @_;
@@ -21,9 +29,16 @@ sub run_tests {
 	my $tb = Test::More->builder;
 	eval {
 		for my $test_file (@test_files) {
+			open FILE, $test_file;
+			my $test_definition = join '', <FILE>;
+			my $run_command = extract_run_command($test_definition);
+			close FILE;
+
 			$tb->reset();
 			delete $INC{$test_file};
 			require $test_file;
+
+			eval $run_command if $run_command;
 		}
 	} or do {
 		print $@;

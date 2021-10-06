@@ -15,4 +15,4 @@ describe 'My test' => sub {
 	};
 };
 
-runtests;
+runtests unless caller;
