@@ -15,4 +15,4 @@ describe 'My test' => sub {
 	};
 };
 
-runtests unless caller;
+runtests(@ARGV) unless caller;
